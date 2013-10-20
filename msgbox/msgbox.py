@@ -7,8 +7,8 @@ from kivy.uix.modalview import ModalView
 from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout 
 from kivy.core.window import Window
-from kivy.properties import ListProperty, NumericProperty, \
-                        StringProperty, ObjectProperty
+from kivy.properties import ListProperty, NumericProperty, StringProperty,\
+                            ObjectProperty, BooleanProperty
 from kivy.uix.button import Button
 
 Builder.load_string('''
@@ -37,7 +37,7 @@ Builder.load_string('''
 
 class MsgBox(ModalView):
     
-    dialog_type = StringProperty('info')
+    type = StringProperty('info')
     title = StringProperty('')
     text = StringProperty('')
     font_size = ObjectProperty('14dp')
@@ -48,7 +48,6 @@ class MsgBox(ModalView):
         def __init__(self, *args, **kw):
             kw.setdefault('halign', 'left')
             kw.setdefault('valign', 'middle')
-            kw.setdefault('size_hint', (1, 0.1))
             super(MsgBox.MsgBox_Title, self).__init__(*args, **kw)
             self.bind(size=self.setter('text_size'))
     
@@ -62,7 +61,8 @@ class MsgBox(ModalView):
             self.bind(size=self.setter('text_size'))
             
     class MsgBox_Button(Button):
-        pass
+        
+        type = StringProperty('')
     
     class MsgBox_Separator(Widget):
         
@@ -79,7 +79,13 @@ class MsgBox(ModalView):
         self.yes_button = None
         self.no_button = None
         
+        self._callbacks = {
+                      'ok': kw.pop('ok_callback', None),
+                      'yes': kw.pop('yes_callback', None),
+                      'no': kw.pop('no_callback', None)}
+        
         kw.setdefault('size_hint', (0.5, 0.5))
+        kw.setdefault('autodismiss', False)
         super(MsgBox, self).__init__(*args, **kw)
         self.build_layout()
         
@@ -102,18 +108,27 @@ class MsgBox(ModalView):
                                     padding=self.buttons_padding,
                                     spacing=self.buttons_padding)
         # create buttons according to type of message box
-        if self.dialog_type == 'info':
-            self.ok_button = self.MsgBox_Button(text="OK", font_size=self.font_size)
+        if self.type == 'info':
+            self.ok_button = self.MsgBox_Button(text="OK", font_size=self.font_size, type='ok')
             self.button_bar.add_widget(self.ok_button)
-        if self.dialog_type == 'question':
-            self.yes_button = self.MsgBox_Button(text="Yes", font_size=self.font_size)
-            self.no_button = self.MsgBox_Button(text="No", font_size=self.font_size)
+            self.ok_button.bind(on_release=self.btn_release)
+        if self.type == 'question':
+            self.yes_button = self.MsgBox_Button(text="Yes", font_size=self.font_size, type='yes')
+            self.no_button = self.MsgBox_Button(text="No", font_size=self.font_size, type='no')
             self.button_bar.add_widget(self.yes_button)
             self.button_bar.add_widget(self.no_button)
+            self.yes_button.bind(on_release=self.btn_release)
+            self.no_button.bind(on_release=self.btn_release)
         
         self.content.add_widget(self.button_bar)
         
         self.add_widget(self.content)
+        
+    def btn_release(self, btn):
+        self.dismiss()
+        callback = self._callbacks.get(btn.type)
+        if callback:
+            callback()
         
 
 class MainApp(App):
