@@ -5,7 +5,7 @@ from kivy.graphics import Rectangle
 from kivy.uix.widget import Widget 
 from kivy.uix.scatter import ScatterPlane
 from kivy.graphics import Rectangle
-from kivy.core.image import Image 
+from kivy.core.image import Image
 
 Builder.load_string('''
 #place kivy notation of app here
