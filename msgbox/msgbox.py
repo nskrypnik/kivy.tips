@@ -25,13 +25,15 @@ Builder.load_string('''
             pos: self.pos
             
 <MsgBox_Title>:
-    size_hint: 1, 0.1
+    size_hint: 1, None
+    size: 0, '40dp'
             
 <MsgBox_Text>:
     size_hint: 1, 1
     
 <MsgBox_ButtonsBar>:
-    size_hint: 1, 0.5
+    size_hint: 1, None
+    size: 0, '80dp'
 ''')
 
 
@@ -129,7 +131,20 @@ class MsgBox(ModalView):
         callback = self._callbacks.get(btn.type)
         if callback:
             callback()
-        
+    
+    @classmethod    
+    def info(cls, **kw):
+        kw['type'] = 'info'
+        msg = cls(**kw)
+        msg.open()
+        return msg
+
+    @classmethod    
+    def question(cls, **kw):
+        kw['type'] = 'question'
+        msg = cls(**kw)
+        msg.open()
+        return msg
 
 class MainApp(App):
     
