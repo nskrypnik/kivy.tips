@@ -22,6 +22,7 @@ class MainApp(App):
         MsgBox.question(text="Are you able to answer for this question?", title="hello world",
                         yes_callback=lambda: MsgBox.info(text='You said Yes'),
                         no_callback=lambda: MsgBox.info(text='You said No'),
+                        size_hint=(0.6, 0.6)
                         )
         return root
         
